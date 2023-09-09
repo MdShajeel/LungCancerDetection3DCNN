@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DICOM File Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #upload-form {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            border: 2px solid #ccc;
+            display: inline-block;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: #fff;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #0056b3;
+        }
+
+        #progress-container {
+            margin-top: 20px;
+        }
+
+        #progress-bar {
+            width: 0;
+            height: 20px;
+            background-color: #007BFF;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        #progress-text {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        /* Style the submit button */
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Disabled submit button style */
+        input[type="submit"]:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Add hover effect to the submit button */
+        input[type="submit"]:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+
+        .processing {
+            animation: processingAnimation 1s infinite alternate;
+        }
+
+        @keyframes processingAnimation {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+
+        #file-count {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload DICOM Files</h1>
+    <form id="upload-form" method="POST" enctype="multipart/form-data">
+        <label for="dicom_files" class="custom-file-upload">
+            Choose DICOM Files
+        </label>
+        <input type="file" name="dicom_files" id="dicom_files" accept=".dcm" multiple>
+        <div id="file-count">No files selected</div> <!-- Display file count here -->
+        <!-- Styled submit button -->
+        <input type="submit" value="Upload" id="upload-button" disabled>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+            <div id="progress-text">0% - Waiting for upload...</div>
+            <div id="error-message" class="error-message"></div> <!-- Error message container -->
+        </div>
+    </form>
+
+    <script>
+        // Function to update file count display
+        function updateFileCount() {
+            const fileInput = document.getElementById("dicom_files");
+            const fileCountDisplay = document.getElementById("file-count");
+            const uploadButton = document.getElementById("upload-button");
+            if (fileInput.files.length > 0) {
+                fileCountDisplay.innerText = fileInput.files.length + " file(s) selected";
+                if (fileInput.files.length < 20) {
+                    // Disable the upload button and show an error message
+                    uploadButton.disabled = true;
+                    document.getElementById("error-message").innerText = "Minimum 20 files required.";
+                } else {
+                    // Enable the upload button and clear any error message
+                    uploadButton.disabled = false;
+                    document.getElementById("error-message").innerText = "";
+                }
+            } else {
+                fileCountDisplay.innerText = "No files selected";
+                // Disable the upload button when no file is selected
+                uploadButton.disabled = true;
+                document.getElementById("error-message").innerText = "Please select at least one file.";
+            }
+        }
+
+        // Update file count when files are selected
+        document.getElementById("dicom_files").addEventListener("change", updateFileCount);
+
+        function checkProgress() {
+            fetch('/progress') // Send a GET request to /progress endpoint
+                .then(response => response.json())
+                .then(data => {
+                    const progressBar = document.getElementById("progress-bar");
+                    const progressText = document.getElementById("progress-text");
+
+                    progressBar.style.width = data.percentage + "%";
+                    progressText.innerText = data.percentage + "% - " + data.message;
+
+                    if (data.percentage === 100) {
+                        // Change the text to "Processing" with animation
+                        progressText.classList.add("processing");
+                        progressText.innerText = "Processing";
+                    } else if (data.percentage < 100) {
+                        // Continue polling until progress reaches 100%
+                        setTimeout(checkProgress, 1000); // Poll every 1 second (adjust as needed)
+                    }
+                })
+                .catch(error => console.error('Error checking progress:', error));
+        }
+
+        // Start checking progress when the page loads
+        checkProgress();
+    </script>
+</body>
+</html>

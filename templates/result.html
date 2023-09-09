@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8); /* Translucent white background */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999; /* Ensure the overlay is on top of the page */
+        }
+
+        .loading-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #007BFF; /* Blue loader color */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        .timer {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        h1 {
+            font-family: 'Helvetica', sans-serif;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            max-width: 600px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Prediction Results</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Prediction</th>
+                <th>View Report</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prediction in predictions %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ "Cancer" if prediction[1] == 1 else "No Cancer" }}</td>
+                <td><a href="{{ url_for('generate_report', name=name) }}" id="generate-report-button" class="btn btn-primary">Generate Report</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="loading-overlay" class="overlay">
+        <div class="loading-text">Generating Report...</div>
+        <div class="loader"></div>
+        <div id="timer" class="timer">Time left: 120s</div>
+    </div>
+
+    <script>
+        const generateReportButton = document.getElementById("generate-report-button");
+        const loadingOverlay = document.getElementById("loading-overlay");
+        const timerDisplay = document.getElementById("timer");
+
+        // Hide the loading overlay by default
+        loadingOverlay.style.display = "none";
+
+        // Add a click event listener to the "Generate Report" button
+        generateReportButton.addEventListener("click", function () {
+            // Show the loading overlay
+            loadingOverlay.style.display = "flex";
+
+            // Disable the button to prevent multiple clicks
+            this.disabled = true;
+
+            // Simulate the report generation process (adjust the duration as needed)
+            setTimeout(function () {
+                // Redirect to the report generation page
+                window.location.href = generateReportButton.href;
+            }, 3000); // Simulate a 3-second report generation time (adjust as needed)
+
+            // Start a 120-second countdown timer
+            let seconds = 120;
+            const timerInterval = setInterval(function () {
+                seconds--;
+                timerDisplay.innerText = "Time left: " + seconds + "s";
+                if (seconds <= 0 && seconds > -3) {
+                    clearInterval(timerInterval);
+                    timerDisplay.innerText = "Time's up!";
+                }
+                if (seconds <= -3) {
+                    clearInterval(timerInterval);
+                    timerDisplay.innerText = "Please Wait. It's taking longer than usual";
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
