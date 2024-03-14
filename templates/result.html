@@ -5,7 +5,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #F2F6FF;
             margin: 0;
             padding: 0;
             display: flex;
@@ -13,6 +13,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            overflow: hidden; /* Prevent scrolling */
         }
 
         .overlay {
@@ -37,7 +38,7 @@
 
         .loader {
             border: 5px solid #f3f3f3;
-            border-top: 5px solid #007BFF; /* Blue loader color */
+            border-top: 5px solid #6e54ff; /* Blue loader color */
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -64,7 +65,7 @@
         table {
             border-collapse: collapse;
             width: 80%;
-            max-width: 600px;
+            max-width: 60%;
             background-color: #fff;
             border-radius: 5px;
             box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
@@ -89,10 +90,20 @@
         tr:hover {
             background-color: #e0e0e0;
         }
+
+        .lung {
+            position: absolute;
+            width: auto; /* Adjust the width as needed */
+            left: 65%;
+            max-width: 100%; /* Ensure the image is responsive */
+            height: 120%; /* Maintain aspect ratio */
+            z-index: -1;
+        }
     </style>
 </head>
 <body>
     <h1>Prediction Results</h1>
+    <img src="{{ url_for('static', filename='lung.png') }}" alt="lun" class="lung">
     <table>
         <thead>
             <tr>
@@ -102,59 +113,66 @@
             </tr>
         </thead>
         <tbody>
-            {% for prediction in predictions %}
             <tr>
                 <td>{{ name }}</td>
-                <td>{{ "Cancer" if prediction[1] == 1 else "No Cancer" }}</td>
-                <td><a href="{{ url_for('generate_report', name=name) }}" id="generate-report-button" class="btn btn-primary">Generate Report</a></td>
+                <td>{{ predictions }}</td>
+                <td><a href="{{ url_for('generate_report', name=name, birthdate=birthdate) }}" id="generate-report-button" class="btn btn-primary">Generate Report</a></td>
             </tr>
-            {% endfor %}
         </tbody>
     </table>
 
     <div id="loading-overlay" class="overlay">
         <div class="loading-text">Generating Report...</div>
         <div class="loader"></div>
-        <div id="timer" class="timer">Time left: 120s</div>
+        <div id="timer" class="timer">Time left: {{fc}}s</div>
     </div>
-
+    <div id="fc" style="display: none;">{{ fc }}</div>
     <script>
         const generateReportButton = document.getElementById("generate-report-button");
         const loadingOverlay = document.getElementById("loading-overlay");
         const timerDisplay = document.getElementById("timer");
-
+    
         // Hide the loading overlay by default
         loadingOverlay.style.display = "none";
-
+    
         // Add a click event listener to the "Generate Report" button
         generateReportButton.addEventListener("click", function () {
             // Show the loading overlay
             loadingOverlay.style.display = "flex";
-
+    
             // Disable the button to prevent multiple clicks
             this.disabled = true;
-
+    
             // Simulate the report generation process (adjust the duration as needed)
             setTimeout(function () {
                 // Redirect to the report generation page
                 window.location.href = generateReportButton.href;
             }, 3000); // Simulate a 3-second report generation time (adjust as needed)
+    
+            // Start a x-second countdown timer
+            // let numberOfFiles = {{fc}};
+            // let seconds = 0.62 * numberOfFiles + 44.8;
 
-            // Start a 120-second countdown timer
-            let seconds = 120;
+            const fcValue = document.getElementById("fc").textContent;
+            let numberOfFiles = parseInt(fcValue);
+            let seconds =  numberOfFiles ;
+
             const timerInterval = setInterval(function () {
                 seconds--;
                 timerDisplay.innerText = "Time left: " + seconds + "s";
-                if (seconds <= 0 && seconds > -3) {
-                    clearInterval(timerInterval);
-                    timerDisplay.innerText = "Time's up!";
-                }
-                if (seconds <= -3) {
+                if (seconds <= -2) {
                     clearInterval(timerInterval);
                     timerDisplay.innerText = "Please Wait. It's taking longer than usual";
+                } else if (seconds <= 0 && seconds > -2) {
+                    clearInterval(timerInterval);
+                    timerDisplay.innerText = "Time's up!";
+                    // After 3 seconds of "Time's up!", display the "Please Wait" message
+                    setTimeout(function () {
+                        timerDisplay.innerText = "Please Wait. It's taking longer than usual";
+                    }, 3000);
                 }
             }, 1000);
         });
-    </script>
+    </script>    
 </body>
 </html>

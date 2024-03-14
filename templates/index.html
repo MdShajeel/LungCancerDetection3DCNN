@@ -4,78 +4,125 @@
     <title>DICOM File Upload</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
-            background-color: #f2f2f2;
+            background: #F2F6FF; /* Light gray background */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            min-height: 100vh;
         }
-
         h1 {
-            color: #333;
+            font-size: 3rem; /* Responsive font size */
+            margin-bottom: 40px;
         }
 
-        #upload-form {
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-            max-width: 400px;
+        .dimage {
+            width: 60%; /* Responsive width */
+            max-width: 450px; /* Maximum width */
+            height: auto; /* Maintain aspect ratio */
+            display: block;
+            margin: 20px auto; /* Center horizontally with top margin */
+        }
+
+        h2 {
+            color: #fff;
+        }
+
+       #upload-form { /* Add padding inside the container */
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+    border-radius: 20px;
+    border: 3px dashed #47689C; /* Use the 'border' shorthand property */
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+    width: 250px;
+    box-sizing: border-box;
+    margin:30px 25px;
+    height: 220px; /* Adjusted the height to accommodate the padding */
+}
+
+        #upload-button-separator{
+          margin-top:50px;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                justify-content: center;
+            }
+
+            #upload-form {
+                margin-right: 20px; /* Adjust the right margin as needed for smaller screens */
+            }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 18px;
         }
 
         input[type="file"] {
             display: none;
         }
 
-        .custom-file-upload {
-            border: 2px solid #ccc;
+        .upload-icon {
+            padding-top:35px;
             display: inline-block;
-            padding: 10px 20px;
+            height:70px;
+        }
+
+        .custom-file-upload {
             cursor: pointer;
-            background-color: #007BFF;
-            color: #fff;
-            border-radius: 5px;
+            color: skyblue; /* Purple background */
             transition: background-color 0.3s ease;
         }
 
         .custom-file-upload:hover {
-            background-color: #0056b3;
+            color: blue; /* Darker purple on hover */
         }
 
-        #progress-container {
-            margin-top: 20px;
+        #info {
+            margin:auto;
+            width:96%;
+            height:22px;
+            margin-top:8px;
+            text-align: center;
         }
 
         #progress-bar {
             width: 0;
-            height: 20px;
-            background-color: #007BFF;
+            height:20px;
+            margin:auto;
+            background-color: #4CAF50;
             border-radius: 5px;
             transition: width 0.3s ease;
         }
 
         #progress-text {
-            margin-top: 10px;
             font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            text-align:center;
         }
 
-        /* Style the submit button */
         input[type="submit"] {
             background-color: #4CAF50;
             color: white;
+            width:110px;
             padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            font-size: 16px;
         }
 
-        /* Disabled submit button style */
         input[type="submit"]:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
 
-        /* Add hover effect to the submit button */
         input[type="submit"]:hover:not(:disabled) {
             background-color: #45a049;
         }
@@ -86,39 +133,105 @@
 
         @keyframes processingAnimation {
             from { opacity: 1; }
-            to { opacity: 0.5; }
+            to { opacity: 0.7; }
         }
 
         #file-count {
+            height:14px;
+            margin-bottom:5px;
             font-size: 14px;
-            margin-top: 10px;
+            color: #777;
         }
 
         .error-message {
             color: red;
             font-weight: bold;
-            margin-top: 10px;
+            margin:auto;
+        }
+        .outer-box {
+            display: inline-block;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            background-color: #69A0E1;
+            border-radius: 50px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+            width: 300px; /* Fixed width for the upload form */
+            height: 400px;
+            margin-right: 150px; /* Adjust the right margin as needed */
+        }
+        .left-sec{
+            margin-top: -100px;
+            margin-right: 400px;
         }
     </style>
 </head>
 <body>
-    <h1>Upload DICOM Files</h1>
-    <form id="upload-form" method="POST" enctype="multipart/form-data">
-        <label for="dicom_files" class="custom-file-upload">
-            Choose DICOM Files
-        </label>
-        <input type="file" name="dicom_files" id="dicom_files" accept=".dcm" multiple>
-        <div id="file-count">No files selected</div> <!-- Display file count here -->
-        <!-- Styled submit button -->
-        <input type="submit" value="Upload" id="upload-button" disabled>
-        <div id="progress-container">
-            <div id="progress-bar"></div>
-            <div id="progress-text">0% - Waiting for upload...</div>
-            <div id="error-message" class="error-message"></div> <!-- Error message container -->
-        </div>
-    </form>
+    <div class="left-sec">
+    <h1>AI-Driven Cancer Predictions</h1>
+    <img src="{{ url_for('static', filename='doctor.png') }}" alt="dimage" class="dimage">
+    </div>
+    <div class="outer-box">
+        <h2>Upload DICOM Files</h2>
+        <form id="upload-form" method="POST" enctype="multipart/form-data">
+            <img src="{{ url_for('static', filename='upload-icon.png') }}" alt="upload-icon" class="upload-icon">
 
+            
+            <label for="dicom_files" >
+                Drag and Drop or<br><u class="custom-file-upload">Choose DICOM Files</u>
+            </label>
+            <input type="file" name="dicom_files" id="dicom_files" accept=".dcm" multiple>
+            <div id="file-count"></div>
+            <div id="info">
+                <div id="error-message" class="error-message"></div>
+                <div id="progress-bar"><div id="progress-text"></div></div>
+                
+                
+            </div>
+            
+            <div id="progress-container">
+                
+                
+            </div>
+            <div id="upload-button-separator">
+            <input type="submit" value="Upload" id="upload-button" disabled>
+            </div>
+        </form>
+    </div>
     <script>
+    
+        // Function to enable the upload button
+        function enableUploadButton() {
+            const uploadButton = document.getElementById("upload-button");
+            uploadButton.disabled = false;
+        }
+        
+        // Function to disable the upload button
+        function disableUploadButton() {
+            const uploadButton = document.getElementById("upload-button");
+            uploadButton.disabled = true;
+        }
+        
+        // Function to re-enable the upload button
+        function reEnableUploadButton() {
+            const uploadButton = document.getElementById("upload-button");
+            uploadButton.disabled = false;
+        }
+        
+        // Event listener to enable the upload button when the file input changes
+        document.getElementById("dicom_files").addEventListener("change", enableUploadButton);
+        
+        // Event listener to disable the upload button when the upload starts
+        document.getElementById("upload-form").addEventListener("submit", disableUploadButton);
+        
+        // Event listener to re-enable the upload button when the files are chosen to upload
+        document.getElementById("dicom_files").addEventListener("change", reEnableUploadButton);
+            
+    
+    
+    
+    
+    
+    
         // Function to update file count display
         function updateFileCount() {
             const fileInput = document.getElementById("dicom_files");
@@ -154,7 +267,7 @@
                     const progressText = document.getElementById("progress-text");
 
                     progressBar.style.width = data.percentage + "%";
-                    progressText.innerText = data.percentage + "% - " + data.message;
+                    progressText.innerText = data.percentage + "%";
 
                     if (data.percentage === 100) {
                         // Change the text to "Processing" with animation
@@ -169,7 +282,7 @@
         }
 
         // Start checking progress when the page loads
-        checkProgress();
+        document.getElementById("upload-button").addEventListener("click", checkProgress);
     </script>
 </body>
 </html>

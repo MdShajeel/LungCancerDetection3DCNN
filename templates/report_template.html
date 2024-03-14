@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Report</title>
+    <style>
+        /* Add your report styles here */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+        .spacer {
+            max-width: 80%; /* Set max-width to 80% */
+            margin: 0 auto;
+            padding: 40px;
+        }
+        .report-container {
+            max-width: 80%; /* Set max-width to 80% */
+            height: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+            text-align: left; /* Align text to the left */
+        }
+        .separator {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .patient-info {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .image-section {
+            margin-top: 20px;
+            text-align: center; /* Align images to the center */
+        }
+        .image-container {
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            width: 300px; /* Set fixed width for the image containers */
+            height: 300px; /* Set fixed height for the image containers */
+            overflow: hidden; /* Hide overflowing image parts */
+            position: relative; /* Position for loading animation */
+            display: inline-block; /* Display images inline */
+        }
+        .report-image {
+            width: 100%; /* Make images responsive */
+            height: 100%; /* Make images responsive */
+        }
+    </style>
+</head>
+<body>
+    <div class="spacer"></div>
+    <div class="report-container">
+        <h1 style="text-align: center;">Lung Cancer Report</h1>
+        <div class="separator"></div>
+        <div class="patient-info">
+            <p><strong>Name:</strong>{{ name }}</p>
+            <p><strong>DOB:</strong>{{ birthdate }}</p>
+            <p><strong>ID:</strong> {{ name }}</p>
+            <p><strong>Cancer:</strong> {{ predictions }}</p>
+        </div>
+        <div class="separator"></div>
+
+         <!-- First Image Section -->
+         <div class="image-section">
+            <h2>Rib Cage</h2>
+            <div class="image-container">
+                <!-- Add your first image here with specified dimensions -->
+                <img class="report-image" src="data:image/png;base64,{{ image1_base64 }}" alt="Image 1" width="300" height="300">
+            </div>
+        </div>
+        <div class="separator"></div>
+        <!-- Second Image Section -->
+        <div class="image-section">
+            <h2>Lungs</h2>
+            <div class="image-container">
+                <!-- Add your second image here with specified dimensions -->
+                <img class="report-image" src="data:image/png;base64,{{ image2_base64 }}" alt="Image 2" width="300" height="300">
+            </div>
+        </div>
+    </div>
+    <!-- New Container (Dynamic Height) -->
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <div class="report-container">
+        <div class="separator"></div>
+        <!-- Third Image Section -->
+        <div class="image-section">
+            <h2>Bronchi</h2>
+            <div class="image-container">
+                <!-- Add your third image here with specified dimensions -->
+                <img class="report-image" src="data:image/png;base64,{{ image3_base64 }}" alt="Image 3" width="300" height="300">
+            </div>
+        </div>
+    </div>
+    <div class="spacer"></div>
+</body>
+</html>

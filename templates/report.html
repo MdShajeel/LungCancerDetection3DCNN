@@ -4,146 +4,289 @@
     <title>Report for {{ name }}</title>
     <style>
         /* Add your report styles here */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
         .report-container {
-            max-width: 80%; /* Set max-width to 80% */
+            max-width: 80%;
             margin: 0 auto;
-            padding: 20px;
+            padding: 30px;
             border: 1px solid #ddd;
             background-color: #fff;
             box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-100%);
+            transition: transform 1s;
         }
-        .patient-info {
-            font-size: 18px;
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .report-header h1 {
+            font-size: 24px;
             font-weight: bold;
-            opacity: 0; /* Initially hide patient info */
-            transition: opacity 1s; /* Transition for fade-in effect */
+            margin: 0;
         }
+
+        .patient-info {
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
         .separator {
             margin-top: 20px;
             border-top: 1px solid #ddd;
-            opacity: 0; /* Initially hide separator */
-            transition: opacity 1s; /* Transition for fade-in effect */
-        }
-        .image-section {
-            margin-top: 20px;
-            text-align: left; /* Align images to the left */
-            opacity: 0; /* Initially hide image sections */
-            transition: opacity 1s; /* Transition for fade-in effect */
         }
 
         .image-container {
-            margin-top: 10px;
             border: 1px solid #ddd;
-            padding: 10px;
-            width: 300px; /* Set fixed width for the image containers */
-            height: 300px; /* Set fixed height for the image containers */
-            overflow: hidden; /* Hide overflowing image parts */
-            position: relative; /* Position for loading animation */
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            overflow: hidden;
         }
+
+        .image-placeholder {
+            max-width: 100%;
+            height: auto;
+        }
+
         .report-image {
-            width: 100%; /* Make images responsive */
-            height: 100%; /* Make images responsive */
+            max-width: 100%;
+            height: auto;
+            display: none;
+            transition: opacity 1s; /* Add fade transition */
         }
-        /* Loading animation */
+
         .loading {
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: none; /* Hide loading div by default */
-            align-items: center;
-            justify-content: center;
+            display: none;
+            text-align: center;
         }
-        @keyframes loadingAnimation {
-            0% {
-                opacity: 0.2;
-            }
-            50% {
-                opacity: 0.5;
-            }
-            100% {
-                opacity: 0.2;
-            }
+
+        .slider-container {
+            text-align: center;
+        }
+
+        .image-slider {
+            width: 80%;
+            margin-top: 10px;
+        }
+
+        .scrolling-images-section {
+            margin-top: 40px;
+            display: flex; /* Display sections horizontally */
+            justify-content: space-between; /* Add space between sections */
+        }
+
+        .scrolling-images-section h2 {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .scrolling-image-container {
+    border: 1px solid #ddd;
+    padding: 20px;
+    text-align: center;
+    overflow: hidden;
+    flex: 1; /* Divide available space evenly */
+    display: flex; /* Use flexbox to align items */
+    flex-direction: column; /* Stack child elements vertically */
+}
+
+.scrolling-image-container .loading {
+    display: none;
+}
+
+.scrolling-image-container .image-placeholder {
+    max-width: 100%;
+    height: auto;
+    flex: 1; /* Grow to fill remaining space */
+}
+
+.scrolling-image-container .report-image {
+    max-width: 100%;
+    height: auto;
+    display: none;
+    flex: 1; /* Grow to fill remaining space */
+}
+
+
+        .download-link {
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .download-link a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #6e54ff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .download-link a:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
     <div class="report-container">
-        <h1>Lung Cancer Report</h1>
-        <div class="patient-info">
-            <p><strong>Name:</strong>{{ name }}</p>
-            <p><strong>DOB:</strong>{{ birthdate }}</p>
-            <p><strong>ID:</strong> {{ name }}</p>
+        <div class="report-header">
+            <h1>Lung Cancer Report</h1>
+            <div class="separator"></div>
         </div>
-        <div><a href="{{ url_for('generate_pdf', name=name) }}" download="report.pdf">Download Report</a>
+        <div class="patient-info">
+            <p><strong>Name:</strong> {{ name }}</p>
+            <p><strong>DOB:</strong> {{ birthdate }}</p>
+            <p><strong>ID:</strong> {{ name }}</p>
+            <p><strong>Cancer:</strong>{{predictions}}</p>
         </div>
         <div class="separator"></div>
-
-        <!-- First Image Section -->
-        <div class="image-section">
-            <h2>Image Section 1</h2>
-            <div class="image-container">
-                <div class="loading">Loading...</div> <!-- Loading animation -->
-                <!-- Add your first image here with specified dimensions -->
-                <img class="report-image" src="{{ url_for('get_image', image_name='3d_image1.png') }}" alt="Image 1" width="300" height="300">
+        <div class="image-container">
+            <h2>Rib Cage</h2>
+            <div class="loading"><img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..."></div>
+            <img class="image-placeholder" src="{{ url_for('static', filename='loading.gif') }}" alt="Image 1">
+            <img class="report-image" src="{{ url_for('get_image', image_name='3d_image1.png') }}" alt="Image 1">
+        </div>
+        <div class="image-container">
+            <h2>Lungs</h2>
+            <div class="loading"><img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..."></div>
+            <img class="image-placeholder" src="{{ url_for('static', filename='loading.gif') }}" alt="Image 2">
+            <img class="report-image" src="{{ url_for('get_image', image_name='3d_image2.png') }}" alt="Image 2">
+        </div>
+        <div class="image-container">
+            <h2>Bronchi</h2>
+            <div class="loading"><img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..."></div>
+            <img class="image-placeholder" src="{{ url_for('static', filename='loading.gif') }}" alt="Image 3">
+            <img class="report-image" src="{{ url_for('get_image', image_name='3d_image3.png') }}" alt="Image 3">
+        </div>
+        
+        <!-- First scrolling images section -->
+        <div class="scrolling-images-section">
+            <div class="scrolling-image-container">
+                <h2>Axial View</h2>
+                <div class="loading"><img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..."></div>
+                <img class="image-placeholder" src="{{ url_for('static', filename='loading.gif') }}" alt="Scrolling Image" style="height: 512px;width: 512px;">
+                <img class="report-image" id="axial-scrolling-image" src="{{ url_for('get_scrolling_image', image_name=axial_image_names[0]) }}" alt="Scrolling Image" style="height: 512px;width: 512px;">
+                <div class="slider-container">
+                    <input type="range" class="image-slider" id="axial-image-slider" min="0" max="{{ axial_image_names | length }}" step="1" value="0">
+                </div>
+            </div>
+            <!-- Second scrolling images section -->
+            <div class="scrolling-image-container">
+                <h2>Coronal View</h2>
+                <div class="loading"><img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..."></div>
+                <img class="image-placeholder" src="{{ url_for('static', filename='loading.gif') }}" alt="Scrolling Image" style="height: 512px;width: 512px;">
+                <img class="report-image" id="coronal-scrolling-image" src="{{ url_for('get_scrolling_image', image_name=coronal_image_names[0]) }}" alt="Scrolling Image" style="height: 512px;width: 512px;">
+                <div class="slider-container">
+                    <input type="range" class="image-slider" id="coronal-image-slider" min="0" max="{{ coronal_image_names | length }}" step="1" value="0">
+                </div>
+            </div>
+            <!-- Third scrolling images section -->
+            <div class="scrolling-image-container">
+                <h2>Sagittal View</h2>
+                <div class="loading"><img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..."></div>
+                <img class="image-placeholder" src="{{ url_for('static', filename='loading.gif') }}" alt="Scrolling Image" style="height: 512px;width: 512px;">
+                <img class="report-image" id="sagittal-scrolling-image" src="{{ url_for('get_scrolling_image', image_name=sagittal_image_names[0]) }}" alt="Scrolling Image" style="height: 512px;width: 512px;">
+                <div class="slider-container">
+                    <input type="range" class="image-slider" id="sagittal-image-slider" min="0" max="{{ sagittal_image_names | length }}" step="1" value="0">
+                </div>
             </div>
         </div>
-
-        <!-- Second Image Section -->
-        <div class="image-section">
-            <h2>Image Section 2</h2>
-            <div class="image-container">
-                <div class="loading">Loading...</div> <!-- Loading animation -->
-                <!-- Add your second image here with specified dimensions -->
-                <img class="report-image" src="{{ url_for('get_image', image_name='3d_image2.png') }}" alt="Image 2" width="300" height="300">
-            </div>
-        </div>
-
-        <!-- Third Image Section -->
-        <div class="image-section">
-            <h2>Image Section 3</h2>
-            <div class="image-container">
-                <div class="loading">Loading...</div> <!-- Loading animation -->
-                <!-- Add your third image here with specified dimensions -->
-                <img class="report-image" src="{{ url_for('get_image', image_name='3d_image3.png') }}" alt="Image 3" width="300" height="300">
-            </div>
+        <div class="download-link">
+            <a href="{{ url_for('generate_pdf', name=name) }}" download="report.pdf">Download PDF Report</a>
         </div>
     </div>
     <script>
-        // JavaScript to fade in content bit by bit
         document.addEventListener("DOMContentLoaded", function () {
+            var reportContainer = document.querySelector(".report-container");
+            setTimeout(function () {
+                reportContainer.style.transform = "translateY(0)";
+            }, 100);
             setTimeout(function () {
                 var patientInfo = document.querySelector(".patient-info");
                 patientInfo.style.opacity = "1";
-            }, 500); // Delay for patient info
-
+            }, 600);
             setTimeout(function () {
                 var separator = document.querySelector(".separator");
                 separator.style.opacity = "1";
-            }, 1000); // Delay for separator
-
-            var imageSections = document.querySelectorAll(".image-section");
+            }, 1100);
+            var imageSections = document.querySelectorAll(".image-container");
             imageSections.forEach(function (section, index) {
                 setTimeout(function () {
                     section.style.opacity = "1";
-                }, 1500 + (index * 500)); // Delay for image sections with staggered timing
+                }, 1600 + (index * 500));
             });
+            var scrollingSections = document.querySelectorAll(".scrolling-images-section");
+            scrollingSections.forEach(function (section, index) {
+                setTimeout(function () {
+                    section.style.opacity = "1";
+                }, 2100 + (index * 500));
+            });
+            setTimeout(function () {
+                var downloadLink = document.querySelector(".download-link");
+                downloadLink.style.opacity = "1";
+            }, 2600);
+        });
+    
+        function loadScrollImage(index, scrollingImage, imageNames) {
+            var scrollingImageContainer = scrollingImage.parentElement;
+            var currentImagePlaceholder = scrollingImageContainer.querySelector(".image-placeholder");
+
+            currentImagePlaceholder.style.display = "block";
+            scrollingImage.style.display = "none";
+
+            var newImageName = imageNames[index];
+            var newImage = new Image();
+            newImage.src = "{{ url_for('get_scrolling_image', image_name='') }}" + newImageName;
+            newImage.onload = function () {
+                currentImagePlaceholder.style.display = "none";
+                scrollingImage.style.display = "block";
+                scrollingImage.src = newImage.src;
+            };
+        }
+
+        // Load initial scrolling images and preload the rest
+        var axialImageNames = {{ axial_image_names | tojson | safe }};
+        var coronalImageNames = {{ coronal_image_names | tojson | safe }};
+        var sagittalImageNames = {{ sagittal_image_names | tojson | safe }};
+
+        var axialScrollingImage = document.getElementById("axial-scrolling-image");
+        loadScrollImage(0, axialScrollingImage, axialImageNames);
+        var axialSlider = document.getElementById("axial-image-slider");
+        axialSlider.max = axialImageNames.length - 1; // Set max value to length - 1
+
+        var coronalScrollingImage = document.getElementById("coronal-scrolling-image");
+        loadScrollImage(0, coronalScrollingImage, coronalImageNames);
+        var coronalSlider = document.getElementById("coronal-image-slider");
+        coronalSlider.max = coronalImageNames.length - 1; // Set max value to length - 1
+
+        var sagittalScrollingImage = document.getElementById("sagittal-scrolling-image");
+        loadScrollImage(0, sagittalScrollingImage, sagittalImageNames);
+        var sagittalSlider = document.getElementById("sagittal-image-slider");
+        sagittalSlider.max = sagittalImageNames.length - 1; // Set max value to length - 1
+
+        // Event listeners for sliders
+        axialSlider.addEventListener("input", function () {
+            loadScrollImage(parseInt(axialSlider.value), axialScrollingImage, axialImageNames);
         });
 
-        // JavaScript to hide the loading animation when images are loaded
-        document.addEventListener("DOMContentLoaded", function () {
-            var images = document.querySelectorAll(".report-image");
-            images.forEach(function (image) {
-                image.onload = function () {
-                    var loadingDiv = image.parentElement.querySelector(".loading");
-                    if (loadingDiv) {
-                        loadingDiv.style.display = "none";
-                    }
-                };
-            });
+        coronalSlider.addEventListener("input", function () {
+            loadScrollImage(parseInt(coronalSlider.value), coronalScrollingImage, coronalImageNames);
         });
+
+        sagittalSlider.addEventListener("input", function () {
+            loadScrollImage(parseInt(sagittalSlider.value), sagittalScrollingImage, sagittalImageNames);
+        });
+
     </script>
 </body>
 </html>
