@@ -127,7 +127,7 @@ for filename in os.listdir("output_images"):
 def generate_report(name, birthdate):
     temp_dir = 'temp_upload'
     birthdate = birthdate[:4] + '/' + birthdate[4:6] + '/' + birthdate[-2:]
-    #render(temp_dir)
+    render(temp_dir)
     generate_Screening()
     # Get a list of image names in the output_images folder
     image_folder = 'output_images'
