@@ -124,7 +124,7 @@
     <div id="loading-overlay" class="overlay">
         <div class="loading-text">Generating Report...</div>
         <div class="loader"></div>
-        <div id="timer" class="timer">Time left: {{fc}}s</div>
+        <div id="timer" class="timer">We estimate this will take {{fc}}s to Generate.</div>
     </div>
     <div id="fc" style="display: none;">{{ fc }}</div>
     <script>
@@ -159,13 +159,13 @@
 
             const timerInterval = setInterval(function () {
                 seconds--;
-                timerDisplay.innerText = "Time left: " + seconds + "s";
+                timerDisplay.innerText = "We estimate this will take " + seconds + "s"+" to Generate.";
                 if (seconds <= -2) {
                     clearInterval(timerInterval);
                     timerDisplay.innerText = "Please Wait. It's taking longer than usual";
                 } else if (seconds <= 0 && seconds > -2) {
                     clearInterval(timerInterval);
-                    timerDisplay.innerText = "Time's up!";
+                    timerDisplay.innerText = "Please wait while we're generating";
                     // After 3 seconds of "Time's up!", display the "Please Wait" message
                     setTimeout(function () {
                         timerDisplay.innerText = "Please Wait. It's taking longer than usual";

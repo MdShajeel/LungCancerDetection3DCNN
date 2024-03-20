@@ -2,6 +2,9 @@
 <html>
 <head>
     <title>Report for {{ name }}</title>
+    <link rel="preload" href="{{ url_for('get_scrolling_image', image_name=axial_image_names[0]) }}" as="image">
+    <link rel="preload" href="{{ url_for('get_scrolling_image', image_name=coronal_image_names[0]) }}" as="image">
+    <link rel="preload" href="{{ url_for('get_scrolling_image', image_name=sagittal_image_names[0]) }}" as="image">
     <style>
         /* Add your report styles here */
         body {
@@ -34,6 +37,20 @@
             font-size: 16px;
             opacity: 0;
             transition: opacity 1s;
+        }
+        .patient-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .info-left {
+            float: left;
+        }
+
+        .info-right {
+            float: right;
+            margin-right: 25px;
         }
 
         .separator {
@@ -135,7 +152,9 @@
         .download-link a:hover {
             background-color: #0056b3;
         }
+        
     </style>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <div class="report-container">
@@ -144,31 +163,50 @@
             <div class="separator"></div>
         </div>
         <div class="patient-info">
-            <p><strong>Name:</strong> {{ name }}</p>
-            <p><strong>DOB:</strong> {{ birthdate }}</p>
-            <p><strong>ID:</strong> {{ name }}</p>
-            <p><strong>Cancer:</strong>{{predictions}}</p>
+            <div class="info-left">
+                <p><strong>Name:</strong> {{ name }}</p>
+                <p><strong>DOB:</strong> {{ birthdate }}</p>
+                <p><strong>ID:</strong> {{ name }}</p>
+                <p><strong>Status: </strong>{{ predictions }}</p>
+            </div>
+            <div class="info-right">
+                <p><strong>Nodule Area: </strong>{{ size }} mm²</p>
+            </div>
         </div>
         <div class="separator"></div>
         <div class="image-container">
             <h2>Rib Cage</h2>
-            <div class="loading"><img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..."></div>
-            <img class="image-placeholder" src="{{ url_for('static', filename='loading.gif') }}" alt="Image 1">
-            <img class="report-image" src="{{ url_for('get_image', image_name='3d_image1.png') }}" alt="Image 1">
+            <div id="plotly-graph">
+                {{ plot_html1 | safe }}
+            </div>
         </div>
         <div class="image-container">
             <h2>Lungs</h2>
-            <div class="loading"><img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..."></div>
-            <img class="image-placeholder" src="{{ url_for('static', filename='loading.gif') }}" alt="Image 2">
-            <img class="report-image" src="{{ url_for('get_image', image_name='3d_image2.png') }}" alt="Image 2">
+            <div id="plotly-graph">
+                {{ plot_html2 | safe }}
+            </div>
         </div>
         <div class="image-container">
             <h2>Bronchi</h2>
-            <div class="loading"><img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..."></div>
-            <img class="image-placeholder" src="{{ url_for('static', filename='loading.gif') }}" alt="Image 3">
-            <img class="report-image" src="{{ url_for('get_image', image_name='3d_image3.png') }}" alt="Image 3">
+            <div id="plotly-graph">
+                {{ plot_html3 | safe }}
+            </div>
         </div>
-        
+        {% if predictions == 'Cancer' %}
+        <div class="separator"></div>
+        <div class="image-container">
+            <h2>Masked Cell</h2>
+            <div class="loading"><img src="loading.gif" alt="Loading..."></div>
+            {% if masked_image_exists %}
+            <img class="image-placeholder" src="{{ url_for('get_image', image_name='org_image.png') }}" alt="Orginal Image">
+            <img class="report-image" src="{{ url_for('get_image', image_name='org_image.png') }}" alt="Orginal Image">
+            <img class="image-placeholder" src="{{ url_for('get_image', image_name='masked_image.png') }}" alt="Masked Cell Image">
+            <img class="report-image" src="{{ url_for('get_image', image_name='masked_image.png') }}" alt="Masked Cell Image">
+            {% else %}
+            <p>Cannot create mask at this moment.</p>
+            {% endif %}
+        </div>
+        {% endif %}
         <!-- First scrolling images section -->
         <div class="scrolling-images-section">
             <div class="scrolling-image-container">
@@ -253,6 +291,31 @@
                 scrollingImage.src = newImage.src;
             };
         }
+        var axialImageNames = {{ axial_image_names | tojson | safe }};
+    var axialPreloadedImages = [];
+    axialImageNames.forEach(function (imageName) {
+        var image = new Image();
+        image.src = "{{ url_for('get_scrolling_image', image_name='') }}" + imageName;
+        axialPreloadedImages.push(image);
+    });
+
+    // Preload all coronal images
+    var coronalImageNames = {{ coronal_image_names | tojson | safe }};
+    var coronalPreloadedImages = [];
+    coronalImageNames.forEach(function (imageName) {
+        var image = new Image();
+        image.src = "{{ url_for('get_scrolling_image', image_name='') }}" + imageName;
+        coronalPreloadedImages.push(image);
+    });
+
+    // Preload all sagittal images
+    var sagittalImageNames = {{ sagittal_image_names | tojson | safe }};
+    var sagittalPreloadedImages = [];
+    sagittalImageNames.forEach(function (imageName) {
+        var image = new Image();
+        image.src = "{{ url_for('get_scrolling_image', image_name='') }}" + imageName;
+        sagittalPreloadedImages.push(image);
+    });
 
         // Load initial scrolling images and preload the rest
         var axialImageNames = {{ axial_image_names | tojson | safe }};
