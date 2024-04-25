@@ -28,12 +28,14 @@ NoSlices = 64
 temp_dir = ''
 result=''
 conversion_factor=0
+nodule_area=0
+axial_image_names=[]
 # Initialize a global variable to store the progress percentage
 progress_percentage = 0
 birthdate=''
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
-    global progress_percentage,birthdate,result,processedData,conversion_factor
+    global progress_percentage,birthdate,result,processedData,conversion_factor,nodule_area
     if request.method == 'POST':
         # Get uploaded files
         uploaded_files = request.files.getlist("dicom_files")
@@ -259,14 +261,15 @@ for filename in os.listdir("output_images"):
 
 @app.route('/generate_report/<name>/<birthdate>', methods=['GET'])
 def generate_report(name, birthdate):
+    global axial_image_names
     temp_dir = 'temp_upload'
     birthdate = birthdate[:4] + '/' + birthdate[4:6] + '/' + birthdate[-2:]
     plot_html1,plot_html2,plot_html3=render(temp_dir)
     generate_Screening()
-    print("-*-*-*-*-*-*-**--*-*-*-*-*-*-*-*-*-**-*-*-*-")
-    print(result)
+    nodule_area=0
     if result=='Cancer':
         nodule_area=mask_cell() 
+        nodule_area=int(nodule_area*conversion_factor) if nodule_area!=0 else "NA"
     # Get a list of image names in the output_images folder
     image_folder = 'output_images'
     image_names = os.listdir(image_folder)
@@ -280,7 +283,7 @@ def generate_report(name, birthdate):
     axial_image_names.sort(key=lambda x: int(x.split('_')[2].split('.')[0]))
     coronal_image_names.sort(key=lambda x: int(x.split('_')[2].split('.')[0]))
     sagittal_image_names.sort(key=lambda x: int(x.split('_')[2].split('.')[0]))
-    print(axial_image_names,coronal_image_names,sagittal_image_names)
+    #print(axial_image_names,coronal_image_names,sagittal_image_names)
     if os.path.exists("temp_images\masked_image.png"):
         status=True
     else:
@@ -289,7 +292,7 @@ def generate_report(name, birthdate):
                            axial_image_names=axial_image_names, 
                            coronal_image_names=coronal_image_names, 
                            sagittal_image_names=sagittal_image_names,
-                           predictions=result,plot_html1=plot_html1,plot_html2=plot_html2,plot_html3=plot_html3,masked_image_exists=status,size=nodule_area*conversion_factor)
+                           predictions=result,plot_html1=plot_html1,plot_html2=plot_html2,plot_html3=plot_html3,masked_image_exists=status,size=nodule_area)
 
 
     #return render_template('report.html', name=name, birthdate=birthdate)
@@ -656,9 +659,10 @@ def mask_cell():
 
         # Save the figure before displaying it
         plt.savefig('temp_images/org_image.png')
+        return nodule_area
     else:
         print("No cancer found.")
-    return nodule_area
+    return 0
 
 
 @app.route('/get_image/<image_name>')
@@ -682,9 +686,21 @@ def encode_image(image_path):
 
 @app.route('/download_report/<name>')
 def generate_pdf(name):
-    image1_base64 = encode_image("temp_images/3d_image1.png")
-    image2_base64 = encode_image("temp_images/3d_image2.png")
-    image3_base64 = encode_image("temp_images/3d_image3.png")
+    image1_base64=''
+    image2_base64=''
+    if os.path.exists("temp_images\masked_image.png"):
+        status=True
+        image1_base64 = encode_image("temp_images/masked_image.png")
+        image2_base64 = encode_image("temp_images/org_image.png")
+    else:
+        status=False
+    axial_image_base64_list = []
+    for image_name in axial_image_names:
+        image_path = os.path.join('output_images', image_name)
+        with open(image_path, 'rb') as image_file:
+            image_data = image_file.read()
+            image_base64 = base64.b64encode(image_data).decode('utf-8')
+            axial_image_base64_list.append(image_base64)
     # Render the HTML template with data
     #html_content = render_template('report_template.html', predictions=predictions,name=name, birthdate=birthdate)
     html_content = render_template(
@@ -692,9 +708,11 @@ def generate_pdf(name):
         predictions=result,
         name=name,
         birthdate=birthdate[:4]+'/'+birthdate[4:6]+'/'+birthdate[-2:],
+        masked_image_exists=status,
         image1_base64=image1_base64,
         image2_base64=image2_base64,
-        image3_base64=image3_base64
+        size=nodule_area,
+        axial_image_base64_list=axial_image_base64_list
     )
     # Define file paths
     temp_html_file = f"templates/temp_{name}.html"
@@ -724,7 +742,32 @@ def generate_pdf(name):
     os.remove(pdf_file)
 
     return response
-
+@app.route('/gerneartepage/<name>')
+def generate_page(name):
+    image1_base64=''
+    image2_base64=''
+    if os.path.exists("temp_images\masked_image.png"):
+        status=True
+        image1_base64 = encode_image("temp_images/masked_image.png")
+        image2_base64 = encode_image("temp_images/org_image.png")
+    else:
+        status=False
+    axial_image_base64_list = []
+    for image_name in axial_image_names:
+        image_path = os.path.join('output_images', image_name)
+        with open(image_path, 'rb') as image_file:
+            image_data = image_file.read()
+            image_base64 = base64.b64encode(image_data).decode('utf-8')
+            axial_image_base64_list.append(image_base64)
+    return render_template('report_template.html',
+        predictions=result,
+        name=name,
+        birthdate=birthdate[:4]+'/'+birthdate[4:6]+'/'+birthdate[-2:],
+        masked_image_exists=status,
+        image1_base64=image1_base64,
+        image2_base64=image2_base64,
+        size=nodule_area,
+        axial_image_base64_list=axial_image_base64_list)
 '''API_KEY = 'f5e0c74f008d47f8b07c76d7c962397'
 
 @app.route('/generate_pdf/<name>')
